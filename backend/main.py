@@ -7,30 +7,53 @@ from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI(title="MatchMe AI Backend")
 
-# Allow requests from your Vite React dev server
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173", 
-        "https://cotesamara.github.io"],
+        "http://localhost:5173",
+        "https://cotesamara.github.io",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load lightweight NLP models once on startup
 nlp = spacy.load("en_core_web_sm")
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Curated tech & industry skill vocabulary for crisp keyword matching
+# Expanded curated tech & industry skill vocabulary
 SKILL_TAXONOMY = {
-    "python", "java", "javascript", "typescript", "c++", "c#", "go", "rust", "ruby", "php", "swift", "kotlin",
-    "react", "next.js", "vue", "angular", "html", "css", "tailwind", "node.js", "express", "fastapi", "django", "flask",
-    "sql", "postgresql", "mysql", "mongodb", "supabase", "firebase", "redis", "graphql", "rest api",
-    "aws", "azure", "gcp", "docker", "kubernetes", "ci/cd", "git", "github", "linux", "terraform",
-    "pandas", "numpy", "scikit-learn", "tensorflow", "pytorch", "spacy", "nlp", "machine learning", "deep learning",
-    "data cleaning", "data analysis", "excel", "vba", "tableau", "power bi", "agile", "scrum", "unit testing"
+    "python", "java", "javascript", "typescript", "c", "c++", "c#", "go", "rust", "ruby", "php", "swift", "kotlin", "r",
+    "react", "react native", "next.js", "vue", "angular", "html", "css", "tailwind", "node.js", "express",
+    "fastapi", "django", "flask", "spring boot", "graphql", "rest api", "restful api",
+    "sql", "postgresql", "mysql", "sqlite", "mongodb", "supabase", "firebase", "redis",
+    "aws", "azure", "gcp", "docker", "kubernetes", "nginx", "ci/cd", "git", "github", "linux", "terraform",
+    "pandas", "numpy", "matplotlib", "scikit-learn", "statsmodels", "tensorflow", "pytorch", "spacy", "nlp",
+    "machine learning", "deep learning", "data cleaning", "data analysis", "data visualization", "statistics",
+    "excel", "vba", "tableau", "power bi", "agile", "scrum", "unit testing", "vhdl", "arm assembly"
 }
+
+# Normalize common variations so "React.js" matches "React" and "Postgres" matches "PostgreSQL"
+SKILL_ALIASES = {
+    "reactjs": "react",
+    "react.js": "react",
+    "nextjs": "next.js",
+    "nodejs": "node.js",
+    "node": "node.js",
+    "postgres": "postgresql",
+    "tailwindcss": "tailwind",
+    "tailwind css": "tailwind",
+    "rest apis": "rest api",
+    "restful apis": "restful api",
+    "ml": "machine learning",
+    "dl": "deep learning",
+    "js": "javascript",
+    "ts": "typescript",
+    "amazon web services": "aws",
+    "google cloud": "gcp",
+}
+
+UPPERCASE_SKILLS = {"sql", "aws", "gcp", "ci/cd", "nlp", "vba", "html", "css", "vhdl", "c", "c++", "c#", "r"}
 
 
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
@@ -43,27 +66,52 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
 
 def extract_keywords(text: str) -> dict[str, str]:
     """
-    Finds matching skills from SKILL_TAXONOMY plus capitalized proper-noun/tech entities via spaCy.
-    Returns {normalized_lowercase: display_label}.
+    Finds matching skills from SKILL_TAXONOMY and SKILL_ALIASES.
+    Returns {canonical_skill: display_label}.
     """
     text_lower = text.lower()
     found: dict[str, str] = {}
 
+    # 1. Check canonical skills
     for skill in SKILL_TAXONOMY:
         pattern = r"(?<![a-zA-Z0-9])" + re.escape(skill) + r"(?![a-zA-Z0-9])"
         if re.search(pattern, text_lower):
-            display = skill.upper() if skill in {"sql", "aws", "gcp", "ci/cd", "nlp", "vba", "html", "css"} else skill.title()
+            display = skill.upper() if skill in UPPERCASE_SKILLS else skill.title()
             found[skill] = display
 
-    doc = nlp(text)
-    for ent in doc.ents:
-        if ent.label_ in {"ORG", "PRODUCT"}:
-            clean = ent.text.strip()
-            norm = clean.lower()
-            if 2 <= len(clean) <= 25 and norm not in found and not any(ch.isdigit() for ch in clean):
-                found[norm] = clean
+    # 2. Check aliases and map to canonical skill
+    for alias, canonical in SKILL_ALIASES.items():
+        pattern = r"(?<![a-zA-Z0-9])" + re.escape(alias) + r"(?![a-zA-Z0-9])"
+        if re.search(pattern, text_lower) and canonical not in found:
+            display = canonical.upper() if canonical in UPPERCASE_SKILLS else canonical.title()
+            found[canonical] = display
 
     return found
+
+
+def compute_semantic_score(resume_text: str, job_description: str) -> int:
+    """
+    Compares each meaningful JD sentence/bullet against the best-matching resume lines
+    so company boilerplate doesn't unfairly drag down similarity.
+    """
+    resume_lines = [line.strip() for line in resume_text.splitlines() if len(line.strip()) > 20]
+    jd_lines = [line.strip() for line in job_description.splitlines() if len(line.strip()) > 20]
+
+    if not resume_lines or not jd_lines:
+        resume_emb = embedder.encode(resume_text, convert_to_tensor=True)
+        jd_emb = embedder.encode(job_description, convert_to_tensor=True)
+        raw_sim = float(util.cos_sim(resume_emb, jd_emb)[0][0])
+    else:
+        resume_embs = embedder.encode(resume_lines, convert_to_tensor=True)
+        jd_embs = embedder.encode(jd_lines, convert_to_tensor=True)
+        sim_matrix = util.cos_sim(jd_embs, resume_embs)
+        # For each JD line, take its strongest match in the resume, then average
+        best_per_jd_line = sim_matrix.max(dim=1).values
+        raw_sim = float(best_per_jd_line.mean())
+
+    # Calibrate raw cosine similarity (0.25 -> 0%, 0.72 -> 100%)
+    calibrated = ((raw_sim - 0.25) / (0.72 - 0.25)) * 100
+    return round(min(100.0, max(0.0, calibrated)))
 
 
 @app.get("/")
@@ -85,27 +133,26 @@ async def analyze_resume(
     if not resume_text:
         raise HTTPException(status_code=400, detail="Could not extract text from the uploaded PDF.")
 
-    # 1. Semantic AI Similarity Score (0 - 100)
-    resume_emb = embedder.encode(resume_text, convert_to_tensor=True)
-    jd_emb = embedder.encode(job_description, convert_to_tensor=True)
-    cosine_sim = float(util.cos_sim(resume_emb, jd_emb).item())
-    semantic_score = round(max(0.0, min(100.0, ((cosine_sim - 0.20) / 0.65) * 100)))
+    # 1. Calibrated Line-Level Semantic Score (0 - 100)
+    semantic_score = compute_semantic_score(resume_text, job_description)
 
-    # 2. Exact Keyword Overlap Score (0 - 100)
+    # 2. Normalized Skill Overlap Score (0 - 100)
     resume_skills = extract_keywords(resume_text)
     jd_skills = extract_keywords(job_description)
 
     if jd_skills:
         matched = [display for norm, display in jd_skills.items() if norm in resume_skills]
         missing = [display for norm, display in jd_skills.items() if norm not in resume_skills]
-        keyword_score = round((len(matched) / len(jd_skills)) * 100)
+        ratio = len(matched) / len(jd_skills)
+        # Gentle curve so missing 1 out of 8 skills scores ~91% instead of dropping harshly
+        keyword_score = round((ratio ** 0.75) * 100)
     else:
         matched = list(resume_skills.values())[:10]
         missing = []
         keyword_score = semantic_score
 
-    # 3. Weighted Hybrid Overall Score (60% Semantic, 40% Keyword)
-    overall_score = round((0.6 * semantic_score) + (0.4 * keyword_score))
+    # 3. Weighted Hybrid Overall Score (65% Must-Have Skills, 35% Role Alignment)
+    overall_score = round((0.35 * semantic_score) + (0.65 * keyword_score))
 
     return {
         "overall_score": overall_score,
