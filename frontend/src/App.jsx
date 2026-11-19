@@ -53,7 +53,7 @@ export default function App() {
       <header className="border-b border-slate-800/80 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-0.5">
           <img 
-            src="/logo.png" 
+            src="logo.png" 
             alt="MatchMe Logo" 
             className="w-13 h-13 object-contain scale-125" 
           />
@@ -89,7 +89,7 @@ export default function App() {
                 {/* SmartCat anchored to the top-right corner of the dashed upload box */}
                 <img 
                   /*src="/catTopScreen.png" */
-                  src="/smartCat.png"
+                  src="smartCat.png"
                   alt="Cat Top Screen" 
                   className="absolute -top-11 right-4 w-18 h-18 object-contain drop-shadow-md pointer-events-none z-10"
                   style={{ imageRendering: 'pixelated' }}
@@ -132,7 +132,7 @@ export default function App() {
                   className="flex-1 min-h-[220px] w-full rounded-xl bg-zinc-950/70 border border-zinc-800 p-4 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 resize-none"
                 />
                 <img 
-                  src="/recruiter.png"
+                  src="recruiter.png"
                   alt="Recruiter" 
                   className="absolute -bottom-10 -left-11 w-24 h-24 object-contain drop-shadow-md pointer-events-none z-10"
                   style={{ imageRendering: 'pixelated' }}
@@ -241,7 +241,7 @@ export default function App() {
             <span className="absolute -right-1 bottom-1 w-1.5 h-1.5 bg-zinc-800 border-r border-b border-sky-400/50 -rotate-45"></span>
           </div>
           <img
-              src="/chicken.png"
+              src="chicken.png"
               alt="Pixel chicken looking up"
               className="absolute -bottom-7 -right-8 w-20 h-20 object-contain drop-shadow-md pointer-events-none z-10"
               style={{ imageRendering: 'pixelated' }}
