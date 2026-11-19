@@ -53,14 +53,19 @@ export default function App() {
       
       {/* Header: gap-1.5 brings the title right next to your logo */}
       <header className="border-b border-slate-800/80 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-0.1">
+        <div className="flex items-center gap-0.5">
           <img 
             src="/logo.png" 
             alt="MatchMe Logo" 
             className="w-13 h-13 object-contain scale-125" 
           />
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Match<span className="text-sky-300">Me</span>
+          <h1 className="font-pixel-title text-2xl sm:text-3xl tracking-tight mt-2">
+            <span className="text-white drop-shadow-[2px_2px_0px_#7dd3fc]">
+              Match
+            </span>
+            <span className="text-sky-300 drop-shadow-[2px_2px_0px_#ffffff]">
+              Me
+            </span>
           </h1>
         </div>
 
@@ -145,15 +150,15 @@ export default function App() {
             <button
               type="submit"
               disabled={!resumeFile || !jobDescription.trim() || isAnalyzing}
-              className="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-sky-400 hover:bg-sky-300 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-slate-950 transition-all shadow-lg shadow-sky-950/40 cursor-pointer"
+              className="font-pixel-ui uppercase tracking-wider w-full py-3.5 px-4 text-sm font-bold bg-sky-300 hover:bg-sky-300 disabled:bg-zinc-800 disabled:border-zinc-700 disabled:shadow-none disabled:text-zinc-500 disabled:cursor-not-allowed text-white drop-shadow-[1px_1px_0px_#0369a1] pixel-btn cursor-pointer"
             >
-              {isAnalyzing ? 'Analyzing Experience...' : 'Match Me'}
+              {isAnalyzing ? 'Analyzing Experience...' : '▶ Match Me'}
             </button>
           </form>
         </section>
 
         {/* RIGHT PANEL: Dark Grayish Results Card */}
-        <section className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-6 flex flex-col shadow-xl">
+        <section className="relative bg-zinc-900/90 border border-zinc-800 rounded-2xl p-6 pb-16 flex flex-col shadow-xl">
           <h2 className="text-lg font-semibold text-white mb-1">Match Analysis</h2>
           <p className="text-sm text-zinc-400 mb-6">See how well your experience and skills line up with this role.</p>
 
@@ -226,6 +231,23 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* Bottom-Right Pixel Chicken + Speech Bubble */}
+          <div className="absolute bottom-6 right-[45px] bg-zinc-800 text-sky-200 border border-sky-400/50 text-[8px] leading-none font-medium px-2 py-1 rounded-md rounded-br-none shadow-lg pointer-events-none z-10 whitespace-nowrap">
+            {!results
+              ? "Let's see...."
+              : results.overall_score > 70
+              ? "Wow, looking good"
+              : "Always room for improvement"}
+            {/* Little speech-bubble tail pointing right toward the chicken */}
+            <span className="absolute -right-1 bottom-1 w-1.5 h-1.5 bg-zinc-800 border-r border-b border-sky-400/50 -rotate-45"></span>
+          </div>
+          <img
+              src="/chicken.png"
+              alt="Pixel chicken looking up"
+              className="absolute -bottom-7 -right-8 w-20 h-20 object-contain drop-shadow-md pointer-events-none z-10"
+              style={{ imageRendering: 'pixelated' }}
+          />
         </section>
 
       </main>

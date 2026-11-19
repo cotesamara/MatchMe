@@ -1,1 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
 @import "tailwindcss";
+
+@layer utilities {
+  .font-pixel-title {
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .font-pixel-ui {
+    font-family: 'Silkscreen', sans-serif;
+  }
+
+  .pixel-btn {
+    border: 3px solid #bae6fd;
+    box-shadow: 4px 4px 0px #0369a1;
+    border-radius: 2px;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .pixel-btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0px #0369a1;
+  }
+
+  .pixel-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0px #0369a1;
+  }
+}
