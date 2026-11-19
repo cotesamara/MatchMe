@@ -131,10 +131,10 @@ export default function App() {
                 <img 
                   src="/recruiter.png"
                   alt="Recruiter" 
-                  className="absolute -bottom-9 -left-10 w-24 h-24 object-contain drop-shadow-md pointer-events-none z-10"
+                  className="absolute -bottom-10 -left-11 w-24 h-24 object-contain drop-shadow-md pointer-events-none z-10"
                   style={{ imageRendering: 'pixelated' }}
                 />
-                <div className="absolute -bottom-1 left-[27px] bg-zinc-800 text-sky-200 border border-sky-400/50 text-[8px] leading-none font-medium px-2 py-1 rounded-md rounded-bl-none shadow-lg pointer-events-none z-10 whitespace-nowrap">
+                <div className="absolute -bottom-1 left-[23px] bg-zinc-800 text-sky-200 border border-sky-400/50 text-[8px] leading-none font-medium px-2 py-1 rounded-md rounded-bl-none shadow-lg pointer-events-none z-10 whitespace-nowrap">
                   This is what I want
                   {/* Little speech-bubble tail pointing left toward the recruiter */}
                   <span className="absolute -left-1 bottom-1 w-1.5 h-1.5 bg-zinc-800 border-l border-b border-sky-400/50 rotate-45"></span>
@@ -147,7 +147,7 @@ export default function App() {
               disabled={!resumeFile || !jobDescription.trim() || isAnalyzing}
               className="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-sky-400 hover:bg-sky-300 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-slate-950 transition-all shadow-lg shadow-sky-950/40 cursor-pointer"
             >
-              {isAnalyzing ? 'Running NLP Models...' : 'Match Me'}
+              {isAnalyzing ? 'Analyzing Experience...' : 'Match Me'}
             </button>
           </form>
         </section>
@@ -155,7 +155,7 @@ export default function App() {
         {/* RIGHT PANEL: Dark Grayish Results Card */}
         <section className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-6 flex flex-col shadow-xl">
           <h2 className="text-lg font-semibold text-white mb-1">Match Analysis</h2>
-          <p className="text-sm text-zinc-400 mb-6">Hybrid semantic & exact keyword breakdown.</p>
+          <p className="text-sm text-zinc-400 mb-6">See how well your experience and skills line up with this role.</p>
 
           {!results ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center border border-dashed border-zinc-800 rounded-xl p-8 bg-zinc-950/30">
@@ -164,7 +164,7 @@ export default function App() {
               </div>
               <p className="text-zinc-300 font-medium">Ready to analyze</p>
               <p className="text-sm text-zinc-500 max-w-xs mt-1">
-                Upload your resume and paste a job description on the left to see your fit score and missing keywords.
+                Upload your resume and paste a job description to see your match score and which skills to add.
               </p>
             </div>
           ) : (
@@ -181,11 +181,11 @@ export default function App() {
 
                 <div className="flex gap-4 text-right">
                   <div>
-                    <div className="text-xs text-zinc-400">Semantic AI</div>
+                    <div className="text-xs text-zinc-400">Role Alignment</div>
                     <div className="text-lg font-bold text-sky-300">{results.semantic_score}%</div>
                   </div>
                   <div className="border-l border-zinc-800 pl-4">
-                    <div className="text-xs text-zinc-400">Exact Keywords</div>
+                    <div className="text-xs text-zinc-400">Must-Have Skills</div>
                     <div className="text-lg font-bold text-emerald-400">{results.keyword_score}%</div>
                   </div>
                 </div>
