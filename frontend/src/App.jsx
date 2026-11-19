@@ -27,18 +27,21 @@ export default function App() {
       formData.append('resume', resumeFile);
       formData.append('job_description', jobDescription);
 
-      // Temporary simulated NLP response while testing the frontend
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      setResults({
-        overall_score: 78,
-        semantic_score: 84,
-        keyword_score: 70,
-        matched_keywords: ['Python', 'React', 'SQL', 'Data Cleaning', 'Git'],
-        missing_keywords: ['Docker', 'AWS', 'CI/CD', 'Kubernetes'],
+      const response = await fetch('http://localhost:8000/api/analyze', {
+        method: 'POST',
+        body: formData,
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Server returned an error.');
+      }
+
+      const data = await response.json();
+      setResults(data);
     } catch (error) {
       console.error('Error analyzing resume:', error);
-      alert('Failed to connect to the analysis server.');
+      alert(error.message || 'Failed to connect to the analysis server.');
     } finally {
       setIsAnalyzing(false);
     }
