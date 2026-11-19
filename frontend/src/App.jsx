@@ -48,10 +48,8 @@ export default function App() {
   };
 
   return (
-    // Deep navy / almost-black outer background
     <div className="min-h-screen bg-[#050814] text-slate-100 flex flex-col font-sans">
-      
-      {/* Header: gap-1.5 brings the title right next to your logo */}
+     
       <header className="border-b border-slate-800/80 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-0.5">
           <img 
@@ -74,7 +72,7 @@ export default function App() {
       {/* Main Split-Screen Layout */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* LEFT PANEL: Dark Grayish Input Card */}
+        {/* LEFT PANEL UPLOAD RESUME AND REQUIREMNETS */}
         <section className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
           <form onSubmit={handleAnalyze} className="space-y-6 flex-1 flex flex-col">
             <div>
@@ -236,7 +234,7 @@ export default function App() {
           <div className="absolute bottom-6 right-[45px] bg-zinc-800 text-sky-200 border border-sky-400/50 text-[8px] leading-none font-medium px-2 py-1 rounded-md rounded-br-none shadow-lg pointer-events-none z-10 whitespace-nowrap">
             {!results
               ? "Let's see...."
-              : results.overall_score > 70
+              : results.overall_score > 50
               ? "Wow, looking good"
               : "Always room for improvement"}
             {/* Little speech-bubble tail pointing right toward the chicken */}
