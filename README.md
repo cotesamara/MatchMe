@@ -1,6 +1,6 @@
 <div align="center">
   <img src="frontend/public/logo.png" alt="MatchMe Logo" width="84" />
-  <h1>📜 MatchMe</h1>
+  <h1>MatchMe</h1>
   <p><strong>An AI-powered, retro-style resume & job description matcher.</strong></p>
   <p>Upload your PDF resume, paste a job posting, and let the pixel crew show how well you match and which skills you're missing in seconds.</p>
 
