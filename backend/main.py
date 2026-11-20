@@ -1,6 +1,5 @@
 import re
 import fitz  # PyMuPDF
-import spacy
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer, util
@@ -18,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-nlp = spacy.load("en_core_web_sm")
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Expanded curated tech & industry skill vocabulary
@@ -91,11 +89,12 @@ def extract_keywords(text: str) -> dict[str, str]:
 
 def compute_semantic_score(resume_text: str, job_description: str) -> int:
     """
-    Compares each meaningful JD sentence/bullet against the best-matching resume lines
-    so company boilerplate doesn't unfairly drag down similarity.
+    Computes semantic similarity using top-k requirement alignment so strong matches
+    reach 90-100% instead of being penalized by short headers or boilerplate.
     """
-    resume_lines = [line.strip() for line in resume_text.splitlines() if len(line.strip()) > 20]
-    jd_lines = [line.strip() for line in job_description.splitlines() if len(line.strip()) > 20]
+    # Filter to meaningful sentences/bullets (at least 4 words)
+    resume_lines = [line.strip() for line in resume_text.splitlines() if len(line.strip().split()) >= 4]
+    jd_lines = [line.strip() for line in job_description.splitlines() if len(line.strip().split()) >= 4]
 
     if not resume_lines or not jd_lines:
         resume_emb = embedder.encode(resume_text, convert_to_tensor=True)
@@ -105,14 +104,18 @@ def compute_semantic_score(resume_text: str, job_description: str) -> int:
         resume_embs = embedder.encode(resume_lines, convert_to_tensor=True)
         jd_embs = embedder.encode(jd_lines, convert_to_tensor=True)
         sim_matrix = util.cos_sim(jd_embs, resume_embs)
-        # For each JD line, take its strongest match in the resume, then average
+
+        # Best resume match for each JD line
         best_per_jd_line = sim_matrix.max(dim=1).values
-        raw_sim = float(best_per_jd_line.mean())
 
-    # Calibrate raw cosine similarity (0.25 -> 0%, 0.72 -> 100%)
-    calibrated = ((raw_sim - 0.25) / (0.72 - 0.25)) * 100
+        # Focus on the top 60% strongest requirement matches so EEO/company fluff doesn't penalize the user
+        k = max(1, int(len(best_per_jd_line) * 0.6))
+        top_matches = best_per_jd_line.topk(k).values
+        raw_sim = float(top_matches.mean())
+
+    # Realistic calibration for MiniLM sentence-level similarity (0.20 -> 0%, 0.58 -> 100%)
+    calibrated = ((raw_sim - 0.20) / (0.58 - 0.20)) * 100
     return round(min(100.0, max(0.0, calibrated)))
-
 
 @app.get("/")
 def health_check():
@@ -133,7 +136,7 @@ async def analyze_resume(
     if not resume_text:
         raise HTTPException(status_code=400, detail="Could not extract text from the uploaded PDF.")
 
-    # 1. Calibrated Line-Level Semantic Score (0 - 100)
+    # 1. Calibrated Top-K Semantic Score (0 - 100)
     semantic_score = compute_semantic_score(resume_text, job_description)
 
     # 2. Normalized Skill Overlap Score (0 - 100)
@@ -144,8 +147,11 @@ async def analyze_resume(
         matched = [display for norm, display in jd_skills.items() if norm in resume_skills]
         missing = [display for norm, display in jd_skills.items() if norm not in resume_skills]
         ratio = len(matched) / len(jd_skills)
-        # Gentle curve so missing 1 out of 8 skills scores ~91% instead of dropping harshly
         keyword_score = round((ratio ** 0.75) * 100)
+
+        # If the candidate hits 100% of listed skills, ensure Role Alignment reflects that strong fit
+        if ratio == 1.0:
+            semantic_score = max(semantic_score, 92)
     else:
         matched = list(resume_skills.values())[:10]
         missing = []
@@ -153,7 +159,6 @@ async def analyze_resume(
 
     # 3. Weighted Hybrid Overall Score (65% Must-Have Skills, 35% Role Alignment)
     overall_score = round((0.35 * semantic_score) + (0.65 * keyword_score))
-
     return {
         "overall_score": overall_score,
         "semantic_score": semantic_score,
