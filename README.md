@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <img src="frontend/public/recruiter.png" width="70" alt="The Recruiter" /><br />
+  <img src="frontend/public/recruiter.png" width="80" alt="The Recruiter" /><br />
   <strong>The Recruiter</strong> — Looks over the job description requirements<br />
   <em>"This is what I want"</em>
 </p>
