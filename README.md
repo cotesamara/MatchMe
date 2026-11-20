@@ -17,11 +17,23 @@
 
 ## Meet the Crew
 
-| Mascot | Role in the App | Vibe |
-| :--- | :--- | :--- |
-| <img src="frontend/public/smartCat.png" width="44" /> **Smart Cat** | Checks your PDF Resume | *"Show me your skills"* |
-| <img src="frontend/public/recruiter.png" width="44" /> **The Recruiter** | Looks over the job description requirements | *"This is what I want"* |
-| <img src="frontend/public/chicken.png" width="44" /> **Pixel Chicken** | Reacts to your final Overall Fit Score | *"Wow, looking good"* / *"Always room for improvement"* |
+<p align="center">
+  <img src="frontend/public/smartCat.png" width="56" alt="Smart Cat" /><br />
+  <strong>Smart Cat</strong> — Checks your PDF Resume<br />
+  <em>"Show me your skills"</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/recruiter.png" width="56" alt="The Recruiter" /><br />
+  <strong>The Recruiter</strong> — Looks over the job description requirements<br />
+  <em>"This is what I want"</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/chicken.png" width="56" alt="Pixel Chicken" /><br />
+  <strong>Pixel Chicken</strong> — Reacts to your final Overall Fit Score<br />
+  <em>"Wow, looking good" / "Always room for improvement"</em>
+</p>
 
 ---
 
