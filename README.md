@@ -56,3 +56,5 @@
                                                     ├──► Compare Overall Meaning (35%) ──┐
   [ Job Posting ] ──────────────────────────────────┤                                    ├──► Overall Fit %
                                                     └──► Compare Matching Skills (65%) ──┘
+
+## What I learned
