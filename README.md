@@ -47,6 +47,11 @@
 - **Clear Skill Breakdown:** Separates keywords into **Matched Skills** and **Missing Skills** so you know exactly what to add before applying.
 - **Retro Pixel Design:** Dark mode (`#050814`) built with pixel fonts (`Press Start 2P` and `Silkscreen`), custom drop-shadow titles, 3D-style pixel buttons, and live speech bubbles.
 
+
+## What I learned
+
+
+
 ---
 
 ## How the Scoring Works
@@ -57,4 +62,4 @@
   [ Job Posting ] ──────────────────────────────────┤                                    ├──► Overall Fit %
                                                     └──► Compare Matching Skills (65%) ──┘
 
-## What I learned
+
